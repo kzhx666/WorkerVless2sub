@@ -1,4 +1,3 @@
-
 let 快速订阅访问入口 = ['auto'];
 let addresses = [];
 let addressesapi = [];
@@ -42,6 +41,7 @@ let MamaJustKilledAMan = ['telegram', 'twitter', 'miaoko'];
 let proxyIPPool = [];
 let socks5Data;
 let alpn = '';
+let serviceName = ''; // [修改] 新增 serviceName 变量
 let 网络备案 = `<a href='https://t.me/CMLiussss'>萌ICP备-20240707号</a>`;//写你自己的维护者广告
 let 额外ID = '0';
 let 加密方式 = 'auto';
@@ -146,10 +146,10 @@ async function 整理测速结果(tls) {
 	// CSV解析函数
 	function parseCSV(text) {
 		return text
-			.replace(/\r\n/g, '\n')   // 统一Windows换行
+			.replace(/\r\n/g, '\n')   // 统一Windows换行
 			.replace(/\r/g, '\n')	 // 处理老Mac换行
-			.split('\n')			   // 按Unix/Linux风格分割
-			.filter(line => line.trim() !== '')  // 移除空行
+			.split('\n')			   // 按Unix/Linux风格分割
+			.filter(line => line.trim() !== '')  // 移除空行
 			.map(line => line.split(',').map(cell => cell.trim()));
 	}
 
@@ -507,7 +507,7 @@ async function subHtml(request) {
 						position: relative;
 						background: rgba(255, 255, 255, 0.7);
 						backdrop-filter: blur(10px);
-						-webkit-backdrop-filter: blur(10px); 
+						-webkit-backdrop-filter: blur(10px); 
 						max-width: 600px;
 						width: 90%;
 						padding: 2rem;
@@ -954,6 +954,7 @@ export default {
 		let type = "ws";
 		let scv = env.SCV || 'false';
 		alpn = env.ALPN || alpn;
+		serviceName = env.SERVICENAME || serviceName; // [修改] 读取环境变量中的 serviceName
 		let UD = Math.floor(((timestamp - Date.now()) / timestamp * 99 * 1099511627776) / 2);
 		if (env.UA) MamaJustKilledAMan = MamaJustKilledAMan.concat(await 整理(env.UA));
 
@@ -1069,6 +1070,7 @@ export default {
 			const extra = url.searchParams.get('extra') || null;
 			xhttp = (mode ? `&mode=${mode}` : "") + (extra ? `&extra=${encodeURIComponent(extra)}` : "");
 			alpn = url.searchParams.get('alpn') || (xhttp ? "h3%2Ch2" : alpn);
+			serviceName = url.searchParams.get('serviceName') || serviceName; // [修改] 读取URL参数中的 serviceName
 			隧道版本作者 = url.searchParams.get(atob('ZWRnZXR1bm5lbA==')) || url.searchParams.get(atob('ZXBlaXVz')) || 隧道版本作者;
 			获取代理IP = url.searchParams.get('proxyip') || 'false';
 
@@ -1385,7 +1387,12 @@ export default {
 					const 特洛伊Link = `${atob(atob('ZEhKdmFtRnVPaTh2')) + uuid}@${address}:${port}?security=tls&sni=${sni}&alpn=${encodeURIComponent(alpn)}&fp=random&type=${type}&host=${伪装域名}&path=${encodeURIComponent(最终路径) + (scv == 'true' ? '&allowInsecure=1' : '')}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(addressid + 节点备注)}`;
 					return 特洛伊Link;
 				} else {
-					const 为烈士Link = `${atob(atob('ZG14bGMzTTZMeTg9')) + uuid}@${address}:${port}?security=tls&sni=${sni}&alpn=${encodeURIComponent(alpn)}&fp=random&type=${type}&host=${伪装域名}&path=${encodeURIComponent(最终路径) + xhttp + (scv == 'true' ? '&allowInsecure=1' : '')}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}&encryption=none#${encodeURIComponent(addressid + 节点备注)}`;
+					// [修改] 开始：支持 VLESS + gRPC
+					// 如果 type 是 grpc，则使用 serviceName 参数，否则使用 path 参数
+					// 如果没有显式提供 serviceName，则尝试使用最终路径（这兼容了 WorkerVless2sub 中将 proxyIP 等信息放在 path 的逻辑）
+					const pathOrService = type === 'grpc' ? `&serviceName=${encodeURIComponent(serviceName || 最终路径)}` : `&path=${encodeURIComponent(最终路径) + xhttp}`;
+					const 为烈士Link = `${atob(atob('ZG14bGMzTTZMeTg9')) + uuid}@${address}:${port}?security=tls&sni=${sni}&alpn=${encodeURIComponent(alpn)}&fp=random&type=${type}&host=${伪装域名}${pathOrService}${(scv == 'true' ? '&allowInsecure=1' : '')}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}&encryption=none#${encodeURIComponent(addressid + 节点备注)}`;
+					// [修改] 结束
 					return 为烈士Link;
 				}
 
