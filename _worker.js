@@ -1385,7 +1385,25 @@ export default {
 					const 特洛伊Link = `${atob(atob('ZEhKdmFtRnVPaTh2')) + uuid}@${address}:${port}?security=tls&sni=${sni}&alpn=${encodeURIComponent(alpn)}&fp=random&type=${type}&host=${伪装域名}&path=${encodeURIComponent(最终路径) + (scv == 'true' ? '&allowInsecure=1' : '')}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(addressid + 节点备注)}`;
 					return 特洛伊Link;
 				} else {
-					const 为烈士Link = `${atob(atob('ZG14bGMzTTZMeTg9')) + uuid}@${address}:${port}?security=tls&sni=${sni}&alpn=${encodeURIComponent(alpn)}&fp=random&type=${type}&host=${伪装域名}&path=${encodeURIComponent(最终路径) + xhttp + (scv == 'true' ? '&allowInsecure=1' : '')}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}&encryption=none#${encodeURIComponent(addressid + 节点备注)}`;
+					// VLESS 链接生成逻辑 (已修复 gRPC)
+					let vlessParams = `security=tls&sni=${sni}&fp=random&type=${type}&encryption=none`;
+
+					if (type === 'grpc') {
+						// 如果是 grpc，原来的 path 实际上是 serviceName
+						// 并且 grpc 通常不需要 host 参数（sni 已经足够），且 mode 通常为 gun
+						// 强制 alpn 为 h2 (如果未指定)
+						const grpcAlpn = alpn ? encodeURIComponent(alpn) : 'h2';
+						vlessParams += `&serviceName=${encodeURIComponent(最终路径)}&mode=gun&alpn=${grpcAlpn}`;
+					} else {
+						// 如果是 ws 或 tcp
+						vlessParams += `&host=${伪装域名}&path=${encodeURIComponent(最终路径) + xhttp}&alpn=${encodeURIComponent(alpn)}`;
+					}
+
+					// 添加通用后缀参数
+					if (scv === 'true') vlessParams += '&allowInsecure=1';
+					vlessParams += `&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}`;
+
+					const 为烈士Link = `${atob(atob('ZG14bGMzTTZMeTg9')) + uuid}@${address}:${port}?${vlessParams}#${encodeURIComponent(addressid + 节点备注)}`;
 					return 为烈士Link;
 				}
 
@@ -1463,3 +1481,4 @@ export default {
 		}
 	}
 };
+
